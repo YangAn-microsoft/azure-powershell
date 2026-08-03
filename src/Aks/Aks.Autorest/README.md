@@ -37,6 +37,8 @@ input-file:
 title: Aks
 module-version: 0.1.0
 subject-prefix: $(service-name)
+# Change Safety: opt in -AcquirePolicyToken / -ChangeReference on write cmdlets
+enable-change-safety: true
 
 directive:
   - where:

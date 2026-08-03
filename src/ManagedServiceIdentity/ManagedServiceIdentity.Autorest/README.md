@@ -36,6 +36,8 @@ input-file:
 
 subject-prefix: ""
 module-version: 0.3.0
+# Change Safety: opt in -AcquirePolicyToken / -ChangeReference on write cmdlets
+enable-change-safety: true
 
 directive:
   # Update Location parameter available

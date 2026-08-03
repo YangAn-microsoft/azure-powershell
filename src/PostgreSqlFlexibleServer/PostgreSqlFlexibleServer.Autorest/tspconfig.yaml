@@ -8,6 +8,8 @@ options:
     module-version: 1.0.0
     prefix: "Az"
     subject-prefix: "PostgreSqlFlexibleServer"
+    # Change Safety: opt in -AcquirePolicyToken / -ChangeReference on write cmdlets
+    enable-change-safety: true
     service-name: PostgreSqlFlexibleServer
     module-name: "{prefix}.{service-name}"
     output-folder: "{output-dir}"

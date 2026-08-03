@@ -43,6 +43,8 @@ title: DataCollectionRule
 module-version: 0.1.0
 namespace: Microsoft.Azure.PowerShell.Cmdlets.Monitor.DataCollection
 subject-prefix: ''
+# Change Safety: opt in -AcquirePolicyToken / -ChangeReference on write cmdlets
+enable-change-safety: true
 
 directive:
   # custom required body

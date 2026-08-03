@@ -53,6 +53,8 @@ try-require:
 module-version: 0.1.0
 title: ContainerRegistry
 subject-prefix: $(service-name)
+# Change Safety: opt in -AcquirePolicyToken / -ChangeReference on write cmdlets
+enable-change-safety: true
 
 inlining-threshold: 100
 

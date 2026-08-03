@@ -45,6 +45,8 @@ module-version: 0.1.0
 root-module-name: $(prefix).Network
 title: NetworkSecurityPerimeter
 subject-prefix: $(service-name)
+# Change Safety: opt in -AcquirePolicyToken / -ChangeReference on write cmdlets
+enable-change-safety: true
 sanitize-names: true
 
 # If there are post APIs for some kinds of actions in the RP, you may need to 

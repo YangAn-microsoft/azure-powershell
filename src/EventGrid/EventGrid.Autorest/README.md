@@ -36,6 +36,8 @@ input-file:
 title: EventGrid
 module-version: 0.1.0
 subject-prefix: $(service-name)
+# Change Safety: opt in -AcquirePolicyToken / -ChangeReference on write cmdlets
+enable-change-safety: true
 
 identity-correction-for-post: true
 resourcegroup-append: true
