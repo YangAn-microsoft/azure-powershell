@@ -8,6 +8,7 @@ options:
     module-version: 0.1.0
     prefix: "Az"
     subject-prefix: "Policy"
+    enable-change-safety: true
     service-name: Policy
     module-name: "{prefix}.{service-name}"
     root-module-name: Az.Resources

@@ -38,6 +38,7 @@ root-module-name: $(prefix).Monitor
 title: Autoscale
 module-version: 0.1.0
 subject-prefix: Autoscale
+enable-change-safety: true
 namespace: Microsoft.Azure.PowerShell.Cmdlets.Monitor.Autoscale
 
 directive:

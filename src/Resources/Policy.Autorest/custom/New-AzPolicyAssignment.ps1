@@ -235,6 +235,15 @@ DynamicParam
     }
 
     $dynamicParameters = New-Object -TypeName 'System.Management.Automation.RuntimeDefinedParameterDictionary'
+    $wrapped = Get-Command -Name 'Az.Policy.private\New-AzPolicyAssignment_CreateExpanded' -ErrorAction Ignore
+    if ($wrapped -and [System.Management.Automation.IDynamicParameters].IsAssignableFrom($wrapped.ImplementingType)) {
+        $instance = [System.Activator]::CreateInstance($wrapped.ImplementingType)
+        foreach ($entry in $instance.GetDynamicParameters().GetEnumerator()) {
+            if (-not $dynamicParameters.ContainsKey($entry.Key)) {
+                $dynamicParameters.Add($entry.Key, $entry.Value)
+            }
+        }
+    }
     if ($parameters)
     {
         foreach ($param in $parameters.PSObject.Properties)

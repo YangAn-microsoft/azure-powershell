@@ -41,6 +41,7 @@ root-module-name: $(prefix).Monitor
 title: DiagnosticSetting
 module-version: 0.1.0
 subject-prefix: DiagnosticSetting
+enable-change-safety: true
 namespace: Microsoft.Azure.PowerShell.Cmdlets.Monitor.DiagnosticSetting
 
 directive:

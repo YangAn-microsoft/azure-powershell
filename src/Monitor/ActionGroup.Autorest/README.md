@@ -41,6 +41,7 @@ title: ActionGroup
 module-version: 0.1.0
 namespace: Microsoft.Azure.PowerShell.Cmdlets.Monitor.ActionGroup
 subject-prefix: ActionGroup
+enable-change-safety: true
 resourcegroup-append: true
 nested-object-to-string: true
 disable-transform-identity-type: true

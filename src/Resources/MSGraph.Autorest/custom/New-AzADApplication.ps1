@@ -620,6 +620,19 @@ function New-AzADApplication {
     # Use the default credentials for the proxy
     ${ProxyUseDefaultCredentials}
   )
+  dynamicparam {
+    $dynamicParameters = [System.Management.Automation.RuntimeDefinedParameterDictionary]::new()
+    $wrapped = Get-Command -Name 'Az.MSGraph.private\New-AzADApplication_CreateExpanded' -ErrorAction Ignore
+    if ($wrapped -and [System.Management.Automation.IDynamicParameters].IsAssignableFrom($wrapped.ImplementingType)) {
+      $instance = [System.Activator]::CreateInstance($wrapped.ImplementingType)
+      foreach ($entry in $instance.GetDynamicParameters().GetEnumerator()) {
+        if (-not $dynamicParameters.ContainsKey($entry.Key)) {
+          $dynamicParameters.Add($entry.Key, $entry.Value)
+        }
+      }
+    }
+    return $dynamicParameters
+  }
 
   process {
     if ($PSBoundParameters.ContainsKey('AvailableToOtherTenants')) {

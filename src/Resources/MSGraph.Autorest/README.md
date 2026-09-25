@@ -59,6 +59,7 @@ root-module-name: $(prefix).Resources
 title: MSGraph
 namespace: Microsoft.Azure.PowerShell.Cmdlets.Resources.MSGraph
 subject-prefix: AD
+enable-change-safety: true
 identity-correction-for-post: true
 endpoint-resource-id-key-name: MicrosoftGraphEndpointResourceId
 export-properties-for-dict: false

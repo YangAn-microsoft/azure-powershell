@@ -84,9 +84,33 @@ function Remove-AzFunctionAppSetting {
         # Use the default credentials for the proxy
         ${ProxyUseDefaultCredentials}
     )
+    dynamicparam {
+        # Change Safety: forward the wrapped generated cmdlet's dynamic parameters (-AcquirePolicyToken / -ChangeReference).
+        # Self-gates on enable-change-safety: the private cmdlet implements IDynamicParameters only when the module opted in.
+        $dynamicParameters = [System.Management.Automation.RuntimeDefinedParameterDictionary]::new()
+        $wrapped = Get-Command -Name 'Az.Functions.private\Set-AzWebAppApplicationSetting_UpdateExpanded' -ErrorAction Ignore
+        if ($wrapped -and [System.Management.Automation.IDynamicParameters].IsAssignableFrom($wrapped.ImplementingType)) {
+            $instance = [System.Activator]::CreateInstance($wrapped.ImplementingType)
+            foreach ($entry in $instance.GetDynamicParameters().GetEnumerator()) {
+                if (-not $dynamicParameters.ContainsKey($entry.Key)) {
+                    $dynamicParameters.Add($entry.Key, $entry.Value)
+                }
+            }
+        }
+        return $dynamicParameters
+    }
     process {
 
         RegisterFunctionsTabCompleters
+
+        $changeSafetyParameters = @{}
+        foreach ($parameterName in @("AcquirePolicyToken", "ChangeReference"))
+        {
+            if ($PSBoundParameters.ContainsKey($parameterName))
+            {
+                $changeSafetyParameters[$parameterName] = $PSBoundParameters[$parameterName]
+            }
+        }
 
         # Remove bound parameters from the dictionary that cannot be process by the intenal cmdlets
         $paramsToRemove = @(
@@ -147,6 +171,11 @@ function Remove-AzFunctionAppSetting {
         $shouldPromptForConfirmation = ContainsReservedFunctionAppSettingName -AppSettingName $AppSettingName
 
         $PSBoundParameters.Add("AppSetting", $newAppSettings)  | Out-Null
+
+        foreach ($entry in $changeSafetyParameters.GetEnumerator())
+        {
+            $PSBoundParameters[$entry.Key] = $entry.Value
+        }
 
         if ($PsCmdlet.ShouldProcess($Name, "Deleting function app setting"))
         {

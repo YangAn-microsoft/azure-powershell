@@ -223,6 +223,21 @@ function Update-AzAutoscaleSetting {
         # Use the default credentials for the proxy
         ${ProxyUseDefaultCredentials}
     )
+
+      dynamicparam {
+        $dynamicParameters = [System.Management.Automation.RuntimeDefinedParameterDictionary]::new()
+        $wrapped = Get-Command -Name 'Az.Autoscale.private\Update-AzAutoscaleSetting_UpdateViaIdentityExpanded' -ErrorAction Ignore
+        if ($wrapped -and [System.Management.Automation.IDynamicParameters].IsAssignableFrom($wrapped.ImplementingType)) {
+          $instance = [System.Activator]::CreateInstance($wrapped.ImplementingType)
+          foreach ($entry in $instance.GetDynamicParameters().GetEnumerator()) {
+            if (-not $dynamicParameters.ContainsKey($entry.Key)) {
+              $dynamicParameters.Add($entry.Key, $entry.Value)
+            }
+          }
+        }
+        return $dynamicParameters
+      }
+
     process {
       try {        
         $hasEnabled = $PSBoundParameters.Remove("Enabled")
@@ -234,6 +249,10 @@ function Update-AzAutoscaleSetting {
         $hasTargetResourceLocation = $PSBoundParameters.Remove("TargetResourceLocation")
         $hasTargetResourceUri = $PSBoundParameters.Remove("TargetResourceUri")
         $hasAsJob = $PSBoundParameters.Remove('AsJob')
+        $acquirePolicyToken = $PSBoundParameters['AcquirePolicyToken']
+        $hasAcquirePolicyToken = $PSBoundParameters.Remove('AcquirePolicyToken')
+        $changeReference = $PSBoundParameters['ChangeReference']
+        $hasChangeReference = $PSBoundParameters.Remove('ChangeReference')
         $null = $PSBoundParameters.Remove('WhatIf')
         $null = $PSBoundParameters.Remove('Confirm')
         
@@ -271,9 +290,15 @@ function Update-AzAutoscaleSetting {
         if ($hasAsJob) {
           $PSBoundParameters.Add("AsJob", $AsJob)
         }
+        if ($hasAcquirePolicyToken) {
+          $PSBoundParameters.Add('AcquirePolicyToken', $acquirePolicyToken)
+        }
+        if ($hasChangeReference) {
+          $PSBoundParameters.Add('ChangeReference', $changeReference)
+        }
 
         if ($PSCmdlet.ShouldProcess("AutoscaleSetting $($AutoscaleSetting.Name)", "Create or update")) {
-          Az.Autoscale.private\New-AzAutoscaleSetting_CreateViaIdentity @PSBoundParameters -InputObject $AutoscaleSetting -Parameter $AutoscaleSetting
+          Az.Autoscale.private\Update-AzAutoscaleSetting_UpdateViaIdentityExpanded @PSBoundParameters -InputObject $AutoscaleSetting -Parameter $AutoscaleSetting
         }
       } catch {
 

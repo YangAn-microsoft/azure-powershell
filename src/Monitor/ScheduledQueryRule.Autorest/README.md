@@ -38,6 +38,7 @@ root-module-name: $(prefix).Monitor
 title: ScheduledQueryRule
 module-version: 0.1.0
 subject-prefix: ScheduledQueryRule
+enable-change-safety: true
 namespace: Microsoft.Azure.PowerShell.Cmdlets.Monitor.ScheduledQueryRule
 
 directive:

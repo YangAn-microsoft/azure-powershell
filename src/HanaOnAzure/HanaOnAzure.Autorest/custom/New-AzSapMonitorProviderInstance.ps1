@@ -202,7 +202,27 @@ function New-AzSapMonitorProviderInstance {
         ${ProxyUseDefaultCredentials}
     )
 
+    dynamicparam {
+        # Change Safety: forward the wrapped generated cmdlet's dynamic parameters (-AcquirePolicyToken / -ChangeReference).
+        # Self-gates on enable-change-safety: the private cmdlet implements IDynamicParameters only when the module opted in.
+        $dynamicParameters = [System.Management.Automation.RuntimeDefinedParameterDictionary]::new()
+        $wrapped = Get-Command -Name 'Az.HanaOnAzure.private\New-AzSapMonitorProviderInstance_CreateExpanded' -ErrorAction Ignore
+        if ($wrapped -and [System.Management.Automation.IDynamicParameters].IsAssignableFrom($wrapped.ImplementingType)) {
+            $instance = [System.Activator]::CreateInstance($wrapped.ImplementingType)
+            foreach ($entry in $instance.GetDynamicParameters().GetEnumerator()) {
+                if (-not $dynamicParameters.ContainsKey($entry.Key)) {
+                    $dynamicParameters.Add($entry.Key, $entry.Value)
+                }
+            }
+        }
+        return $dynamicParameters
+    }
+
     process {
+        $secondaryParameters = @{} + $PSBoundParameters
+        $null = $secondaryParameters.Remove('AcquirePolicyToken')
+        $null = $secondaryParameters.Remove('ChangeReference')
+
         $null = $PSBoundParameters.Remove('ResourceGroupName')
         $null = $PSBoundParameters.Remove('Name')
         $null = $PSBoundParameters.Remove('SapMonitorName')
@@ -239,12 +259,12 @@ function New-AzSapMonitorProviderInstance {
                 # https://github.com/Azure/azure-hanaonazure-cli-extension/blob/master/azext_hanaonazure/custom.py#L312-L338
 
                 # 1. Get MSI
-                $sapMonitor = Get-AzSapMonitor -ResourceGroupName $ResourceGroupName -Name $SapMonitorName @PSBoundParameters
+                $sapMonitor = Get-AzSapMonitor -ResourceGroupName $ResourceGroupName -Name $SapMonitorName @secondaryParameters
                 $managedResourceGroupName = $sapMonitor.ManagedResourceGroupName
                 $sapMonitorId = $managedResourceGroupName.Split("-")[2]
 
                 $msiName = "sapmon-msi-$sapMonitorId"
-                $msi = Az.HanaOnAzure.internal\Get-AzUserAssignedIdentity -ResourceGroupName $managedResourceGroupName -ResourceName $msiName @PSBoundParameters
+                $msi = Az.HanaOnAzure.internal\Get-AzUserAssignedIdentity -ResourceGroupName $managedResourceGroupName -ResourceName $msiName @secondaryParameters
 
                 # 2. Grant key vault access to MSI
                 $null = $HanaDatabasePasswordKeyVaultResourceId -match "^/subscriptions/(?<subscriptionId>[^/]+)/resourceGroups/(?<resourceGroupName>[^/]+)/providers/Microsoft.KeyVault/vaults/(?<vaultName>[^/]+)$"
@@ -258,7 +278,7 @@ function New-AzSapMonitorProviderInstance {
                     ObjectId         = $msi.PrincipalId
                     TenantId         = (Get-AzContext).Tenant.Id
                     PermissionSecret = 'get'
-                } @PSBoundParameters
+                } @secondaryParameters
                 $PSBoundParameters.Add('SubscriptionId', $SubscriptionId)
 
                 # Service accepts secret ID without port

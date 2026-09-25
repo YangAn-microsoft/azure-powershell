@@ -278,7 +278,33 @@ param(
   ${ProxyUseDefaultCredentials}
 )
 
+    dynamicparam {
+        # Change Safety: forward the wrapped generated cmdlet's dynamic parameters (-AcquirePolicyToken / -ChangeReference).
+        # Self-gates on enable-change-safety: the private cmdlet implements IDynamicParameters only when the module opted in.
+        $dynamicParameters = [System.Management.Automation.RuntimeDefinedParameterDictionary]::new()
+        $wrapped = Get-Command -Name 'Az.FrontDoor.private\New-AzFrontDoorWafPolicy_CreateExpanded' -ErrorAction Ignore
+        if ($wrapped -and [System.Management.Automation.IDynamicParameters].IsAssignableFrom($wrapped.ImplementingType)) {
+            $instance = [System.Activator]::CreateInstance($wrapped.ImplementingType)
+            foreach ($entry in $instance.GetDynamicParameters().GetEnumerator()) {
+                if (-not $dynamicParameters.ContainsKey($entry.Key)) {
+                    $dynamicParameters.Add($entry.Key, $entry.Value)
+                }
+            }
+        }
+        return $dynamicParameters
+    }
+
     process {
+        $changeSafetyParameters = @{}
+        foreach ($parameterName in @("AcquirePolicyToken", "ChangeReference"))
+        {
+            if ($PSBoundParameters.ContainsKey($parameterName))
+            {
+                $changeSafetyParameters[$parameterName] = $PSBoundParameters[$parameterName]
+                $null = $PSBoundParameters.Remove($parameterName)
+            }
+        }
+
         $SkuName = $SkuName
         if ($PSBoundParameters.ContainsKey('SkuName')) {
             $null = $PSBoundParameters.Remove('SkuName')
@@ -372,6 +398,11 @@ param(
         }
         if ($CaptchaExpirationInMinutes -gt 0) {
             $PSBoundParameters.Add('CaptchaExpirationInMinutes', $CaptchaExpirationInMinutes)
+        }
+
+        foreach ($entry in $changeSafetyParameters.GetEnumerator())
+        {
+            $PSBoundParameters[$entry.Key] = $entry.Value
         }
 
         $PolicySettings = [Microsoft.Azure.PowerShell.Cmdlets.FrontDoor.Models.PolicySettings]::New()
